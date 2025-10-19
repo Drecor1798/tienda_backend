@@ -1,0 +1,11 @@
+[
+  {
+    "id": "073799fa-9ed7-46a2-af89-d05b137c3cff",
+    "title": "WebCam",
+    "price": 3000,
+    "stock": 6,
+    "description": "WebCam moderna y avanzada",
+    "status": true,
+    "thumbnails": []
+  }
+]
