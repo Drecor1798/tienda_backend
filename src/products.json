@@ -7,5 +7,35 @@
     "description": "WebCam moderna y avanzada",
     "status": true,
     "thumbnails": []
+  },
+  {
+    "id": "0922d512-04c1-461f-bf03-e0238b0c15b9",
+    "title": "Comic",
+    "price": 200000,
+    "stock": 200,
+    "thumbnail": "/image/1762564357736-IMG_20250909_154355617-Photoroom.png",
+    "description": "comic",
+    "status": true,
+    "thumbnails": []
+  },
+  {
+    "id": "d012a178-5ed6-4375-930a-3fd96637c6a2",
+    "title": "comic",
+    "price": 2000,
+    "stock": 20,
+    "thumbnail": "/image/1762565424692-IMG_20250909_154355617-Photoroom.png",
+    "description": "comic random",
+    "status": true,
+    "thumbnails": []
+  },
+  {
+    "id": "08aacedc-5c4a-432c-a695-b1ca99e97e19",
+    "title": "comic",
+    "price": 2000,
+    "stock": 20,
+    "thumbnail": "/image/1762565430773-IMG_20250909_154355617-Photoroom.png",
+    "description": "comic random",
+    "status": true,
+    "thumbnails": []
   }
 ]
