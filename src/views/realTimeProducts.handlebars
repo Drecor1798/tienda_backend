@@ -1,0 +1,137 @@
+<div class="dashboard">
+  <h1 class="dashboard-title">Dashboard - Tiempo Real</h1>
+
+  <!-- Formulario para agregar producto -->
+  <div class="add-product-form">
+    <form id="addForm" enctype="multipart/form-data">
+      <input type="text" name="title" placeholder="Nombre del producto" required>
+      <input type="number" name="price" placeholder="Precio del producto" required>
+      <input type="number" name="stock" placeholder="Cantidad de productos" required>
+      <textarea name="description" rows="3" placeholder="Descripción del producto"></textarea>
+      <input type="file" name="file">
+      <button type="submit">Agregar producto</button>
+    </form>
+  </div>
+
+  <a href="/home" class="button">Vista pública</a>
+
+  <!-- Lista de productos -->
+  <div class="product-grid" id="productGrid">
+    {{#each products}}
+      <div class="product-card" data-id="{{this.id}}">
+        <div class="product-image-container">
+          <img class="product-image" src="{{this.thumbnail}}" alt="{{this.title}}">
+        </div>
+        <h2 class="product-title">{{this.title}}</h2>
+        <h3 class="product-price" data-price="{{this.price}}">Precio: ${{this.price}}</h3>
+        <p class="product-stock" data-stock="{{this.stock}}" style="display:none;">{{this.stock}}</p>
+        <p class="product-description">{{this.description}}</p>
+        <button class="modify-btn" data-id="{{this.id}}">Modificar</button>
+        <button class="delete-btn" data-id="{{this.id}}">Eliminar</button>
+      </div>
+    {{/each}}
+  </div>
+</div>
+
+<div id="editModal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <h2>Modificar producto</h2>
+    <form id="editForm" enctype="multipart/form-data">
+      <input type="hidden" name="id" id="editId">
+      <input type="text" name="title" id="editTitle" placeholder="Nombre" required>
+      <input type="number" name="price" id="editPrice" placeholder="Precio" required>
+      <input type="number" name="stock" id="editStock" placeholder="Stock" required>
+      <textarea name="description" id="editDescription" rows="3" placeholder="Descripción"></textarea>
+      <input type="file" name="file" id="editFile">
+      <button type="submit">Guardar cambios</button>
+      <button type="button" id="closeModal">Cancelar</button>
+    </form>
+  </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io();
+
+  const addForm = document.getElementById("addForm");
+  const editForm = document.getElementById("editForm");
+  const editModal = document.getElementById("editModal");
+  const closeModal = document.getElementById("closeModal");
+  const productGrid = document.getElementById("productGrid");
+
+  // Función para renderizar productos
+  function renderProducts(products) {
+    productGrid.innerHTML = "";
+    products.forEach(p => {
+      const card = document.createElement("div");
+      card.className = "product-card";
+      card.dataset.id = p.id;
+      card.innerHTML = `
+        <div class="product-image-container">
+          <img class="product-image" src="${p.thumbnail}" alt="${p.title}">
+        </div>
+        <h2 class="product-title">${p.title}</h2>
+        <h3 class="product-price" data-price="${p.price}">Precio: $${p.price}</h3>
+        <p class="product-stock" data-stock="${p.stock}" style="display:none;">${p.stock}</p>
+        <p class="product-description">${p.description}</p>
+        <button class="modify-btn" data-id="${p.id}">Modificar</button>
+        <button class="delete-btn" data-id="${p.id}">Eliminar</button>
+      `;
+      productGrid.appendChild(card);
+
+      // Modificar producto
+      card.querySelector(".modify-btn").addEventListener("click", () => {
+        document.getElementById("editId").value = p.id;
+        document.getElementById("editTitle").value = p.title;
+        document.getElementById("editPrice").value = p.price;
+        document.getElementById("editStock").value = p.stock;
+        document.getElementById("editDescription").value = p.description;
+        editModal.style.display = "block";
+      });
+
+      // Eliminar producto
+      card.querySelector(".delete-btn").addEventListener("click", async () => {
+        try {
+          const res = await fetch(`/api/products/${p.id}`, { method: "DELETE" });
+          if (!res.ok) throw new Error("No se pudo eliminar el producto");
+        } catch (err) {
+          alert(err.message);
+        }
+      });
+    });
+  }
+
+  // Escuchar actualizaciones desde el servidor
+  socket.on("updateProducts", products => {
+    renderProducts(products);
+  });
+
+  // Agregar producto
+  addForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const formData = new FormData(addForm);
+    try {
+      const res = await fetch("/api/products", { method: "POST", body: formData });
+      if (!res.ok) throw new Error("No se pudo agregar el producto");
+      addForm.reset();
+    } catch (err) {
+      alert(err.message);
+    }
+  });
+
+  // Editar producto
+  editForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const formData = new FormData(editForm);
+    const pid = formData.get("id");
+    try {
+      const res = await fetch(`/api/products/${pid}`, { method: "PUT", body: formData });
+      if (!res.ok) throw new Error("No se pudo modificar el producto");
+      editModal.style.display = "none";
+    } catch (err) {
+      alert(err.message);
+    }
+  });
+
+  closeModal.addEventListener("click", () => editModal.style.display = "none");
+</script>

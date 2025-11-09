@@ -1,38 +1,35 @@
-<div class="dashboard">
-  <h1 class="dashboard-title">Dashboard</h1>
+<h1>Productos Disponibles</h1>
 
-  {{#with user}}
-    <div class="user-info">
-      <h2 class="username">{{username}}</h2>
-      {{#if isAdmin}}
-        <h3 class="admin-message admin-true">Permisos de administrador</h3>
-      {{else}}
-        <h3 class="admin-message admin-false">No tienes permisos de administrador</h3>
-      {{/if}}
-    </div>
-  {{/with}}
-
-  <div class="add-product-form">
-    <form action="http://localhost:8081/api/products" method="post" enctype="multipart/form-data">
-      <input type="text" name="title" placeholder="Nombre del producto" required>
-      <input type="number" name="price" placeholder="Precio del producto" required>
-      <input type="number" name="stock" placeholder="Cantidad de productos" required>
-      <textarea class="form-control" name="description" rows="3" placeholder="Descripción del producto"></textarea>
-      <input type="file" name="file">
-      <button type="submit">Agregar producto</button>
-    </form>
-  </div>
-
-  <div class="product-grid">
-    {{#each products}}
-      <div class="product-card">
-        <div class="product-image-container">
-          <img class="product-image" src="{{this.thumbnail}}" alt="{{this.title}}">
-        </div>
-        <h2 class="product-title">{{this.title}}</h2>
-        <h3 class="product-price">Precio: ${{this.price}}</h3>
-        <p>{{this.description}}</p>
-      </div>
-    {{/each}}
-  </div>
+<div class="product-grid" id="productGrid">
+  <!-- Aquí Socket.IO inyectará los productos -->
 </div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io();
+  const productGrid = document.getElementById("productGrid");
+
+  // Función para renderizar productos
+  function renderProducts(products) {
+    productGrid.innerHTML = ""; // Limpiamos la grilla
+    products.forEach(p => {
+      const card = document.createElement("div");
+      card.className = "product-card";
+      card.innerHTML = `
+        <div class="product-image-container">
+          <img class="product-image" src="${p.thumbnail}" alt="${p.title}">
+        </div>
+        <h2>${p.title}</h2>
+        <p>Precio: $${p.price}</p>
+        <p>${p.description}</p>
+      `;
+      productGrid.appendChild(card);
+    });
+  }
+
+  // Escuchar actualizaciones desde el servidor
+  socket.on("updateProducts", products => {
+    renderProducts(products);
+  });
+</script>
+

@@ -1,27 +1,38 @@
 import multer from "multer";
 import path from "path";
-import fs from "fs";
+import { fileURLToPath } from "url";
 
-// Carpeta donde se guardarán las imágenes
-const uploadDir = path.join(process.cwd(), "public", "image");
+// Para poder usar __dirname con ES Modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-// Asegurarse de que la carpeta exista
-if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-}
 
-// Configuración de Multer
 const storage = multer.diskStorage({
-    destination: (req, file, callback) => {
-        callback(null, uploadDir);
-    },
-    filename: (req, file, callback) => {
-        const newFileName = Date.now() + "-" + file.originalname;
-        callback(null, newFileName);
-    }
+  destination: (req, file, cb) => {
+
+    cb(null, path.join(__dirname, "/../../public/image"));
+  },
+  filename: (req, file, cb) => {
+    // Genera un nombre único: timestamp + nombre original
+    const ext = path.extname(file.originalname);
+    const name = path.basename(file.originalname, ext).replace(/\s+/g, "-");
+    cb(null, `${Date.now()}-${name}${ext}`);
+  }
 });
 
-// Middleware de subida
-const uploader = multer({ storage });
+// Filtro opcional para permitir solo imágenes
+const fileFilter = (req, file, cb) => {
+  const allowedTypes = /jpeg|jpg|png|gif/;
+  const ext = path.extname(file.originalname).toLowerCase();
+  if (allowedTypes.test(ext)) {
+    cb(null, true);
+  } else {
+    cb(new Error("Solo se permiten imágenes (jpg, png, gif)"));
+  }
+};
+
+// Exportamos el uploader listo para usar
+const uploader = multer({ storage, fileFilter });
 
 export default uploader;
+

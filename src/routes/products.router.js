@@ -1,54 +1,96 @@
 import express from "express";
+import path from "path";
 import ProductManager from "../productManager.js";
-import uploader from "../utils/uploader.js";
+import multer from "multer";
 
 const productRouter = express.Router();
-const productManager = new ProductManager("./src/products.json");
+const productManager = new ProductManager(path.join("src", "products.json"));
+
+// Configuración de multer
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, path.join("public", "image")),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    const name = path.basename(file.originalname, ext);
+    cb(null, `${Date.now()}-${name}${ext}`);
+  },
+});
+const uploader = multer({ storage });
+
 
 productRouter.post("/", uploader.single("file"), async (req, res) => {
   try {
-    if (!req.file)
-      return res.status(400).json({ message: "Falta adjuntar la imagen al formulario" });
-
-    const { title, price, stock, description, status, thumbnails } = req.body;
-    const thumbnail = "./public/image/" + req.file.filename;
-
-    // Solo estos campos son obligatorios
-    const requiredFields = [title, price, stock, thumbnail];
-    const missingFields = requiredFields.filter(
-      (field) => field === undefined || field === null || field === ""
-    );
-
-    if (missingFields.length > 0) {
-      return res.status(400).json({
-        message: `Faltan los siguientes campos obligatorios: ${missingFields.join(", ")}`,
-      });
-    }
-
-    if (isNaN(Number(price)) || Number(price) <= 0) {
-      return res.status(400).json({ message: "El precio debe ser mayor a 0" });
-    }
-
-    if (!Number.isInteger(Number(stock)) || Number(stock) < 0) {
-      return res.status(400).json({ message: "El stock debe ser mayor o igual a 0" });
+    const { title, price, stock, description, status } = req.body;
+    if (!title || !price || !stock || !req.file) {
+      return res.status(400).json({ message: "Faltan campos obligatorios" });
     }
 
     const newProduct = {
       title,
       price: Number(price),
       stock: Number(stock),
-      thumbnail,
+      thumbnail: "/image/" + req.file.filename,
       description: description || "",
       status: status !== undefined ? Boolean(status) : true,
-      thumbnails: Array.isArray(thumbnails) ? thumbnails : [],
+      thumbnails: [],
     };
 
-    const products = await productManager.addProduct(newProduct);
+    await productManager.addProduct(newProduct);
+    const products = await productManager.getProducts();
+
+    // Emitir evento para actualizar en tiempo real
+    req.io.emit("updateProducts", products);
+
     res.status(201).json({ message: "Producto agregado", products });
-    res.redirect("/")
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
+// Editar producto
+productRouter.put("/:pid", uploader.single("file"), async (req, res) => {
+  try {
+    const pid = req.params.pid;
+    const updates = { ...req.body };
+
+    if (req.file) {
+      updates.thumbnail = "/image/" + req.file.filename;
+    }
+
+    const updated = await productManager.setProductById(pid, updates);
+    if (!updated) return res.status(404).json({ message: "Producto no encontrado" });
+
+    const products = await productManager.getProducts();
+    req.io.emit("updateProducts", products);
+
+    res.json({ message: "Producto actualizado", updated });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+
+productRouter.delete("/:pid", async (req, res) => {
+  try {
+    const pid = req.params.pid;
+    const product = await productManager.getProduct(pid);
+
+    if (!product) return res.status(404).json({ message: "Producto no encontrado" });
+
+
+    if (product.thumbnail) {
+      const imagePath = path.join(__dirname, "../public/image", path.basename(product.thumbnail));
+      if (fs.existsSync(imagePath)) fs.unlinkSync(imagePath);
+    }
+
+    const updatedProducts = await productManager.deleteProdcutById(pid);
+    res.status(200).json({ message: "Producto eliminado", products: updatedProducts });
+
+  } catch (error) {
+    console.error("Error al eliminar producto:", error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
 export default productRouter;
+

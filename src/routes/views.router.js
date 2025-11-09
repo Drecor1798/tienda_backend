@@ -1,20 +1,20 @@
-import express from "express"
+import { Router } from "express"; // 👈 CORRECTO
 import ProductManager from "../productManager.js";
+import path from "path";
 
-const viewsRouter = express.Router();
-const productManager = new ProductManager("./src/products.json");
+const viewsRouter = Router(); // 👈 CORRECTO
+const productManager = new ProductManager(path.join(process.cwd(), "src/products.json"));
 
-//endpoint
-viewsRouter.get("/", async(req,res) => {
-    try {
-        const user = { username: "JoaquinDev", isAdmin: true };
-        const products = await productManager.getProducts();
-        
-        res.render("home", { products, user });
-    } catch (error) {
-        res.status(500).json({message: error.message})
-    }
-    
+// Dashboard
+viewsRouter.get("/", async (req, res) => {
+  const products = await productManager.getProducts();
+  res.render("realTimeProducts", { products });
+});
+
+// Vista pública
+viewsRouter.get("/home", async (req, res) => {
+  const products = await productManager.getProducts();
+  res.render("home", { products });
 });
 
 export default viewsRouter;

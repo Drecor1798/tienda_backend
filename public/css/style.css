@@ -1,0 +1,186 @@
+/* Estilos generales */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f8f9fa;
+  margin: 0;
+  padding: 20px;
+}
+
+h1.dashboard-title {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #343a40;
+}
+
+/* Formulario de agregar producto */
+.add-product-form {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.add-product-form input,
+.add-product-form textarea,
+.add-product-form button {
+  display: block;
+  width: 100%;
+  margin-bottom: 15px;
+  padding: 10px;
+  font-size: 14px;
+}
+
+.add-product-form button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.add-product-form button:hover {
+  background-color: #0056b3;
+}
+
+/* Vista pública / enlace */
+.button {
+  display: inline-block;
+  margin-bottom: 20px;
+  text-decoration: none;
+  padding: 10px 20px;
+  background-color: #28a745;
+  color: white;
+  border-radius: 6px;
+  transition: background-color 0.2s;
+}
+
+.button:hover {
+  background-color: #1e7e34;
+}
+
+/* Grilla de productos */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+/* Tarjeta de producto */
+.product-card {
+  background-color: #ffffff;
+  border-radius: 8px;
+  padding: 15px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  position: relative;
+}
+
+.product-image-container {
+  width: 100%;
+  height: 150px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.product-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.product-title {
+  font-size: 18px;
+  margin: 10px 0 5px;
+}
+
+.product-price {
+  font-size: 16px;
+  color: #007bff;
+  margin-bottom: 5px;
+}
+
+.product-description {
+  font-size: 14px;
+  color: #6c757d;
+  min-height: 40px;
+}
+
+
+.modify-btn,
+.delete-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin: 5px 2px;
+  font-size: 14px;
+}
+
+.modify-btn {
+  background-color: #ffc107;
+  color: #212529;
+}
+
+.modify-btn:hover {
+  background-color: #e0a800;
+}
+
+.delete-btn {
+  background-color: #dc3545;
+  color: white;
+}
+
+.delete-btn:hover {
+  background-color: #c82333;
+}
+
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 25px;
+  border-radius: 8px;
+  width: 400px;
+  max-width: 90%;
+  position: relative;
+}
+
+.modal-content h2 {
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+
+.modal-content input,
+.modal-content textarea,
+.modal-content button {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 10px;
+}
+
+.modal-content button {
+  cursor: pointer;
+}
+
+#closeModal {
+  background-color: #6c757d;
+  color: white;
+}
+
+#closeModal:hover {
+  background-color: #5a6268;
+}
